@@ -1,11 +1,133 @@
 %add subsections like this
-\subsection{Hello World}
-This is a template to get started in writing papers or scientific reports.
+\subsection{Introduction}
+This paper is a real life study and application of how I evaluated/modeled/predicted a home's sale price to be sold in Johannesburg. Methodologies and techniques will be discussed so you can also evaluate your home this way using techniques of Machine Learning. How do we do this? \\
 
-%insert figure
-\begin{figure}[htb]
-\centering
-\includegraphics[width=0.8\textwidth]{latexlogo.png}
-\caption{LaTeX Logo}
-\label{fig:latex_logo}
-\end{figure}
+Consider the following: \\
+
+We have a dataset of homes that have been sold in Johannesburg or some suburb in that dataset we have the following features:
+\begin{itemize}
+    \item Number of bedrooms
+    \item Number of bathrooms
+    \item Number of garages
+    \item Size of Land (ERF)
+    \item Floor Size (Size of House)   
+\end{itemize}
+
+We also have the following features that are not numerical but categorical:
+\begin{itemize}
+    \item Type of House (Townhouse, House, Flat)
+    \item Type of Garage (Carport, Garage, No Garage)
+    \item Type of Kitchen (Open Plan, Separate, No Kitchen)
+    \item Type of Bathroom (En-Suite, Separate, No Bathroom)
+    \item Type of Bedroom (En-Suite, Separate, No Bedroom)
+    \item Garden
+    \item Patio
+    \item Pool
+\end{itemize}
+
+that list could go on and on but we will keep it simple for now. \\
+
+We can also have data about the suburb where the house is located, Security Features, the year it was built, the year it was sold, the price it was sold for and even a photo of the house could be used to predict the price. \\
+
+In this paper we use a dataset obtained from a Real Estate Company in Johannesburg. It consists of recent records of homes that have been sold in the suburb Bezuidenhout Valley. \\
+
+The dataset came from a .pdf format which i used some python script to scrape records from that .pdf real estate sales report. For you to obtain that real estate sales report you can purchase one from Property24 or write some API to scrape it. \\
+I converted the data into a pandas dataframe and saved it as a .csv file. \\
+
+The dataset $\mathcal{D}$ consists of $n$ records of homes that have been sold in Bezuidenhout Valley. \\
+Each record $\mathcal{D}_i$ consists of $m$ features. \\
+Which features we use to predict the price of the house is up to us. \\
+
+For this paper we will use the following features: \\ 
+$\mathcal{D}_i$ = $\left\{'Home Meters','Erf Size','Number Bedrooms','Number of Garage','Number of Bathrooms'\right\} $
+
+\subsection{Cons with this approach and notes on model evaluation}
+Using the features which i used in this paper is not the best approach to predict the price of a home. \\
+As i am left with the unknown features that i did not use to predict the price of the home. \\
+
+Example: \\
+I dont know how the home looks, what maintainance is required? Is the home in a good area? Is the home in a bad area? How is the security there?\\
+
+For this paper i never train a model to look at the photos of the home and predict the price of the home. \\
+This model is biased towards the features that i used to train it. \\
+
+My intentions when buying a property i look for ERF Size and Floor Size. \\
+I love space,land and big houses so i used those features to train my model because over $t$ i intent to improve/construct the home better and it will increase in value over $t$ \\
+I am sure many other people look for different features when buying a home. \\
+This is why i say this model is biased towards the features that i used to train it and i am sure some of your guys might also use my methodology and thinking. When reading this paper.\\
+
+But accounting for some missing features is better than not accounting for any features at all. \\
+By using home data of the same neighbourhood we can predict the price of a home in that neighbourhood using the $m$ features set. That will account for the missing features. \\
+
+Note: \\
+The model resonably predicts the price of a home in the same neighbourhood. \\ But judging by the features i used to predict the price of the home, the model is not accurate enough to predict the price of a home in a different neighbourhood. \\
+This is because the model is not trained on data of different neighbourhoods. The model is trained on data of the same neighbourhood. \\
+The model i created might cross the boundary of the sales price or under estimate the sales price. \\ 
+You should use this model as a guide to predict the price of a home in the same neighbourhood. \\ 
+Think of your home that you are going to sell as a home you want to buy and how much am i willing to pay for it.
+You know the condition of your home, you know the area, you know the security features, you know the maintainance required. \\
+Use your discretion if you want to overfit or understate the model. It also depends on your mood on how fast you want to move out or get rid of your property. \\
+
+
+\subsection{Methodology}
+
+\textbf{Step 1: Obtain the Dataset} \\
+First you need to obtain the data of your sales of the neighbourhood over $t$. \\
+You can obtain the data from a real estate company or scrape it from the internet if you got a site containing the information. \\
+
+\textbf{Step 2: Clean the Dataset} \\
+The dataset might contain missing values, outliers, incorrect data types, incorrect values, incorrect feature names. \\
+You need to clean the dataset to make it usable for your model. \\
+Pick the features you want to use to predict the price of the home. \\
+
+\textbf{Step 3: Split the Dataset} \\
+Split the dataset into a training set and a testing set. \\
+The training set is used to train the model. \\
+The testing set is used to test the model. \\
+
+\textbf{Step 4: Train the Model} \\
+Train the model on the training set. \\
+The model learns from the training set. \\
+The model learns the relationship between the features and the price of the home. \\
+
+\textbf{Step 5: Test the Model} \\
+Test the model on the testing set. \\
+The model predicts the price of the home using the features. \\
+The model compares the predicted price of the home with the actual price of the home. \\
+The model calculates the error between the predicted price and the actual price. \\
+The model calculates the accuracy of the model. \\
+
+\textbf{Step 6: Evaluate the Model} \\
+Evaluate the model. \\
+The model is evaluated by the accuracy of the model. \\
+The model is evaluated by the error of the model. \\
+
+In this paper my models is as follows: \\
+I built two models. \\
+
+\textbf{Model 1:} \\
+I used the features: \\
+$\mathcal{D}_i$ = $\left\{'Home Meters','Erf Size','Number Bedrooms','Number of Garage','Number of Bathrooms'\right\} $
+
+I took the $\mathcal{D}$ and trained the dataset using the Sklearn Linear Regression model. 
+\\ $f_{reg}(\mathcal{D}_i) = \beta_0 + \beta_1 \cdot \mathcal{D}_i['Home Meters'] + \beta_2 \cdot \mathcal{D}_i['Erf Size'] + \beta_3 \cdot \mathcal{D}_i['Number Bedrooms'] + \beta_4 \cdot \mathcal{D}_i['Number of Garage'] + \beta_5 \cdot \mathcal{D}_i['Number of Bathrooms']$
+
+\textbf{Model 2:} \\
+I also used the same features: \\
+$\mathcal{D}_i$ = $\left\{'Home Meters','Erf Size','Number Bedrooms','Number of Garage','Number of Bathrooms'\right\} $ \\
+but i used Tensorflow with Keras to build a neural network model. \\
+
+For this model i used the following architecture: \\
+\begin{itemize}
+\item Input Layer: $n$ of training data
+\item Hidden Layer 1: 64 neurons
+\item Hidden Layer 2: 64 neurons
+\item Output Layer: 1 neuron
+\end{itemize}
+
+I converted the pandas csv data into a numpy array / tensor. \\ 
+
+A tensor is a generalization of vectors and matrices to potentially higher dimensions. \\
+I used the Adam optimizer to train the model. \\
+
+Okay we can now proceed to viewing my results in the next following pages. Hope your enjoy! \\

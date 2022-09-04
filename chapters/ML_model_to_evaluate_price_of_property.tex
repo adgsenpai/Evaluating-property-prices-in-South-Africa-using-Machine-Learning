@@ -1,0 +1,717 @@
+
+\hypertarget{creating-machine-learning-models-to-evaluate-price-of-properties-in-bezuidenhout-valley}{%
+\section{Creating Machine Learning models to evaluate price of
+properties in Bezuidenhout
+Valley}\label{creating-machine-learning-models-to-evaluate-price-of-properties-in-bezuidenhout-valley}}
+
+    \hypertarget{overview-and-objectives}{%
+\subsection{Overview and Objectives}\label{overview-and-objectives}}
+
+\hypertarget{overview}{%
+\subsubsection{Overview}\label{overview}}
+
+This notebook is used to find an accurate machine learning model to
+predict/evaluate Sale Price of properties using given specifications of
+homes.
+
+\hypertarget{objectives}{%
+\subsubsection{Objectives}\label{objectives}}
+
+\begin{itemize}
+\tightlist
+\item
+  Clean our dataset to isolate variables suitable for running a model
+  on.
+\item
+  Check which variables influences the house price.
+\item
+  Build a \texttt{Linear\ Regression\ Model} using \texttt{Sklearn} and
+  a \texttt{Neural\ Network\ Model} using
+  \texttt{Tensorflow\ with\ Keras}
+\item
+  Visualise our data and project insights on our dataset
+\end{itemize}
+
+    \hypertarget{data-engineering-dataset}{%
+\subsubsection{Data Engineering
+Dataset}\label{data-engineering-dataset}}
+
+    \hypertarget{importing-our-dataset-for-property-data-in-bezuidenhout-valley}{%
+\paragraph{Importing our dataset for property data in Bezuidenhout
+Valley}\label{importing-our-dataset-for-property-data-in-bezuidenhout-valley}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{66}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
+\PY{n}{df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{data.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} drop cash column}
+\PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{n}{columns}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Cash}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{}viewing our dataset}
+\PY{n}{df}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{66}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+                                  Street Address             Township  \textbackslash{}
+0             214 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+1              77 9TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+2             212 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+3             225 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+4             193 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+5             276 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+6             122 9TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+7                   17 ORLANDO STREET KENSINGTON           KENSINGTON
+8             224 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+9   66 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+10            40 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+11  64 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+12              2 7TH STREET BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+13            177 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+14             35 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+15            258 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+16            83 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+17             68 9TH IVANUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+18            16 11TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+19            221 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+
+   Erf I Portion  Sales Date     Reg Date  Sales Price  Size    R/m\^{}2  \textbackslash{}
+0          594 0    20211018 20220128.000    R 1200000   495  R 2 424
+1          987 0    20220110 20220215.000    R 950 000   495    R 919
+2          592 0    20210716 20220309.000  R 1 200 000   495  R 2 424
+3          605 0    20210803 20211025.000  R 1 075 000   495   R2 172
+4          573 0    20211214          NaN  R 1 500 000   495    R3030
+5          942 0    20220520          NaN  R 1 350 000   495   R 2727
+6         1123 0    20211218 20220316.000  R 1 225 000   495   R 2475
+7         2515 0    20220121 20220328.000  R 1 280 000   495  R 2 586
+8          890 0    20201224 20210407.000  R 1 250 000   495   R 2525
+9          977 0    20211021 20211210.000  R 1 420 000   495  R 2 869
+10        1148 0    20210803 20211112.000  R 1 100 000   495  R 2 222
+11         976 0    20210714 20211102.000   R1 250 000   495   R 2525
+12        1131 0    20210806 20211115.000  R 1 300 000   495   R 2626
+13         285 0    20220422          NaN    R 900 000   495  R 1 818
+14         587 0    20210226 20210624.000  R 1 400 000   495   R 2828
+15           638    20210618 20210906.000   R1 250 000   495   R 2525
+16        1104 0    20210919 20220309.000     R 950000   495    R 919
+17        1069 0    20210218 20210419.000    R 1000000   495    R 020
+18        1221 0    20210610 20211007.000   R 1325 000   543    R 440
+19        601 10    20200701 20201013.000  R 1 270 000   495   R 2566
+
+    Distance  Bedroom  Bath Garage HomeM
+0         94    7.000 7.000      2   300
+1        123      NaN   NaN    NaN     -
+2        103    3.000 2.000      1     -
+3         69    3.000 2.000      -     -
+4        248    3.000 2.500    NaN   200
+5        478    1.000 3.000      1   221
+6        407    3.000 3.000      1     -
+7        442    3.000 3.000      1   237
+8         32    4.000 2.000      1     -
+9        290    3.000 0.000    NaN   264
+10       231    3.000 2.000      1   180
+11       304    6.000 6.000    NaN   218
+12       322    4.000 1.000      1   269
+13       391    3.000 2.000      1     -
+14       124    3.000 2.000      2     -
+15       328    2.000 1.000    NaN    97
+16       297    3.000 3.000      1   105
+17       158    4.000 4.000      2     -
+18       303    3.000 3.000      1   356
+19        53    3.000 3.000      -     -
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{cleaning-up-dataset-only-using-data-where-we-got-homem-values}{%
+\paragraph{Cleaning up dataset only using data where we got HomeM
+values}\label{cleaning-up-dataset-only-using-data-where-we-got-homem-values}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{67}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} drop df where HomeM is \PYZhy{}}
+\PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{!=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZhy{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\PY{n}{df}
+\PY{c+c1}{\PYZsh{} drop index}
+\PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{reset\PYZus{}index}\PY{p}{(}\PY{n}{drop}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\PY{n}{df}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{67}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+                                  Street Address             Township  \textbackslash{}
+0             214 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+1             193 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+2             276 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+3                   17 ORLANDO STREET KENSINGTON           KENSINGTON
+4   66 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+5             40 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+6   64 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+7               2 7TH STREET BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+8             258 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+9             83 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+10            16 11TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+
+   Erf I Portion  Sales Date     Reg Date  Sales Price  Size    R/m\^{}2  \textbackslash{}
+0          594 0    20211018 20220128.000    R 1200000   495  R 2 424
+1          573 0    20211214          NaN  R 1 500 000   495    R3030
+2          942 0    20220520          NaN  R 1 350 000   495   R 2727
+3         2515 0    20220121 20220328.000  R 1 280 000   495  R 2 586
+4          977 0    20211021 20211210.000  R 1 420 000   495  R 2 869
+5         1148 0    20210803 20211112.000  R 1 100 000   495  R 2 222
+6          976 0    20210714 20211102.000   R1 250 000   495   R 2525
+7         1131 0    20210806 20211115.000  R 1 300 000   495   R 2626
+8            638    20210618 20210906.000   R1 250 000   495   R 2525
+9         1104 0    20210919 20220309.000     R 950000   495    R 919
+10        1221 0    20210610 20211007.000   R 1325 000   543    R 440
+
+    Distance  Bedroom  Bath Garage HomeM
+0         94    7.000 7.000      2   300
+1        248    3.000 2.500    NaN   200
+2        478    1.000 3.000      1   221
+3        442    3.000 3.000      1   237
+4        290    3.000 0.000    NaN   264
+5        231    3.000 2.000      1   180
+6        304    6.000 6.000    NaN   218
+7        322    4.000 1.000      1   269
+8        328    2.000 1.000    NaN    97
+9        297    3.000 3.000      1   105
+10       303    3.000 3.000      1   356
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{calculating-rhomem-column}{%
+\paragraph{Calculating R/HomeM Column}\label{calculating-rhomem-column}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{68}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} calc Sales Price / HomeM}
+\PY{c+c1}{\PYZsh{} convert Sales Price to float}
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} remove spaces from Sales Price}
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R/HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)} \PY{o}{/} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}
+\PY{n}{df}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{68}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+                                  Street Address             Township  \textbackslash{}
+0             214 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+1             193 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+2             276 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+3                   17 ORLANDO STREET KENSINGTON           KENSINGTON
+4   66 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+5             40 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+6   64 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+7               2 7TH STREET BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+8             258 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+9             83 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+10            16 11TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+
+   Erf I Portion  Sales Date     Reg Date Sales Price  Size    R/m\^{}2  \textbackslash{}
+0          594 0    20211018 20220128.000     1200000   495  R 2 424
+1          573 0    20211214          NaN     1500000   495    R3030
+2          942 0    20220520          NaN     1350000   495   R 2727
+3         2515 0    20220121 20220328.000     1280000   495  R 2 586
+4          977 0    20211021 20211210.000     1420000   495  R 2 869
+5         1148 0    20210803 20211112.000     1100000   495  R 2 222
+6          976 0    20210714 20211102.000     1250000   495   R 2525
+7         1131 0    20210806 20211115.000     1300000   495   R 2626
+8            638    20210618 20210906.000     1250000   495   R 2525
+9         1104 0    20210919 20220309.000      950000   495    R 919
+10        1221 0    20210610 20211007.000     1325000   543    R 440
+
+    Distance  Bedroom  Bath Garage HomeM   R/HomeM
+0         94    7.000 7.000      2   300  4000.000
+1        248    3.000 2.500    NaN   200  7500.000
+2        478    1.000 3.000      1   221  6108.597
+3        442    3.000 3.000      1   237  5400.844
+4        290    3.000 0.000    NaN   264  5378.788
+5        231    3.000 2.000      1   180  6111.111
+6        304    6.000 6.000    NaN   218  5733.945
+7        322    4.000 1.000      1   269  4832.714
+8        328    2.000 1.000    NaN    97 12886.598
+9        297    3.000 3.000      1   105  9047.619
+10       303    3.000 3.000      1   356  3721.910
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{average-rhomem}{%
+\paragraph{Average R/HomeM}\label{average-rhomem}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{69}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R}\PY{l+s+s1}{\PYZsq{}} \PY{o}{+} \PY{n+nb}{str}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R/HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{p}{)}\PY{p}{)}\PY{p}{)} 
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+R6429.284178520146
+    \end{Verbatim}
+
+    \hypertarget{seperating-erf-and-portion-into-seperate-columns}{%
+\paragraph{Seperating Erf and Portion into seperate
+columns}\label{seperating-erf-and-portion-into-seperate-columns}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{70}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf I Portion}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{str}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Portion}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf I Portion}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{o}{.}\PY{n}{str}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}
+\PY{n}{df}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{70}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+                                  Street Address             Township  \textbackslash{}
+0             214 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+1             193 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+2             276 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+3                   17 ORLANDO STREET KENSINGTON           KENSINGTON
+4   66 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+5             40 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+6   64 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+7               2 7TH STREET BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+8             258 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+9             83 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+10            16 11TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+
+   Erf I Portion  Sales Date     Reg Date Sales Price  Size    R/m\^{}2  \textbackslash{}
+0          594 0    20211018 20220128.000     1200000   495  R 2 424
+1          573 0    20211214          NaN     1500000   495    R3030
+2          942 0    20220520          NaN     1350000   495   R 2727
+3         2515 0    20220121 20220328.000     1280000   495  R 2 586
+4          977 0    20211021 20211210.000     1420000   495  R 2 869
+5         1148 0    20210803 20211112.000     1100000   495  R 2 222
+6          976 0    20210714 20211102.000     1250000   495   R 2525
+7         1131 0    20210806 20211115.000     1300000   495   R 2626
+8            638    20210618 20210906.000     1250000   495   R 2525
+9         1104 0    20210919 20220309.000      950000   495    R 919
+10        1221 0    20210610 20211007.000     1325000   543    R 440
+
+    Distance  Bedroom  Bath Garage HomeM   R/HomeM   Erf Portion
+0         94    7.000 7.000      2   300  4000.000   594       0
+1        248    3.000 2.500    NaN   200  7500.000   573       0
+2        478    1.000 3.000      1   221  6108.597   942       0
+3        442    3.000 3.000      1   237  5400.844  2515       0
+4        290    3.000 0.000    NaN   264  5378.788   977       0
+5        231    3.000 2.000      1   180  6111.111  1148       0
+6        304    6.000 6.000    NaN   218  5733.945   976       0
+7        322    4.000 1.000      1   269  4832.714  1131       0
+8        328    2.000 1.000    NaN    97 12886.598   638     NaN
+9        297    3.000 3.000      1   105  9047.619  1104       0
+10       303    3.000 3.000      1   356  3721.910  1221       0
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{replace-all-nans-to-0}{%
+\paragraph{Replace all NaNs to 0}\label{replace-all-nans-to-0}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{71}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{fillna}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \hypertarget{building-machine-learning-model-to-predict-price-of-property-using-homemerfbedroomgaragebathroom}{%
+\subsection{\texorpdfstring{Building machine learning model to predict
+price of property using
+\texttt{HomeM,Erf,Bedroom,Garage,Bathroom}}{Building machine learning model to predict price of property using HomeM,Erf,Bedroom,Garage,Bathroom}}\label{building-machine-learning-model-to-predict-price-of-property-using-homemerfbedroomgaragebathroom}}
+
+    \hypertarget{predicting-price-of-220-8th-avenue-property-using-linear-regression-from-sklearn}{%
+\subsubsection{\texorpdfstring{Predicting price of property using \texttt{Linear\ Regression} from
+\texttt{Sklearn}}{Predicting price of a property using Linear Regression from Sklearn}}\label{predicting-price-of-220-8th-avenue-property-using-linear-regression-from-sklearn}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{72}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} use polynomial linear regression to predict home sales price}
+\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{linear\PYZus{}model} \PY{k+kn}{import} \PY{n}{LinearRegression}
+\PY{n}{X} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}
+\PY{n}{y} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\PY{n}{model} \PY{o}{=} \PY{n}{LinearRegression}\PY{p}{(}\PY{p}{)}
+\PY{n}{model}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{y}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} predict home sales price}
+\PY{n}{prediction} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{p}{[}\PY{p}{[}\PY{l+m+mi}{248}\PY{p}{,}\PY{l+m+mi}{495}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{]}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\PY{n}{prediction} \PY{o}{=} \PY{n+nb}{round}\PY{p}{(}\PY{n}{prediction}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}
+
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{prediction}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Model Accuracy is :}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{n}{model}\PY{o}{.}\PY{n}{score}\PY{p}{(}\PY{n}{X}\PY{p}{,}\PY{n}{y}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+R 1251315.92
+Model Accuracy is : 0.7149720907585728
+    \end{Verbatim}
+
+    \hypertarget{running-our-model-on-the-actual-sales-price}{%
+\paragraph{Running our model on the actual sales
+price}\label{running-our-model-on-the-actual-sales-price}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{73}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} iterate through all the data and predict home sales price}
+\PY{c+c1}{\PYZsh{} create a new dataframe to store the predicted values}
+
+\PY{c+c1}{\PYZsh{} suppressing warnings for pandas/sci\PYZhy{}learn}
+\PY{k+kn}{import} \PY{n+nn}{warnings}
+\PY{n}{warnings}\PY{o}{.}\PY{n}{filterwarnings}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ignore}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{n}{df\PYZus{}predicted} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{columns}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Street Address}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{df}\PY{p}{)}\PY{p}{)}\PY{p}{:}
+    \PY{c+c1}{\PYZsh{} convert all values to numeric}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n+nb}{float}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n+nb}{float}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n+nb}{float}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n+nb}{float}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n+nb}{float}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{o}{.}\PY{n}{replace}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{ }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]} \PY{o}{=} \PY{n+nb}{float}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+    \PY{c+c1}{\PYZsh{} predict home sales price}
+    \PY{n}{prediction} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{p}{[}\PY{p}{[}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{]}\PY{p}{]}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+    \PY{n}{prediction} \PY{o}{=} \PY{n+nb}{round}\PY{p}{(}\PY{n}{prediction}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}
+    \PY{c+c1}{\PYZsh{} append to dataframe}
+    \PY{n}{df\PYZus{}predicted} \PY{o}{=} \PY{n}{df\PYZus{}predicted}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Street Address}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Street Address}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{prediction}\PY{p}{\PYZcb{}}\PY{p}{,}\PY{n}{ignore\PYZus{}index}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+
+\PY{n}{df\PYZus{}predicted}    
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{73}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+                                  Street Address   HomeM      Erf  Bedroom  \textbackslash{}
+0             214 7TH AVENUE BEZUIDENHOUT VALLEY 300.000  594.000    7.000
+1             193 8TH AVENUE BEZUIDENHOUT VALLEY 200.000  573.000    3.000
+2             276 8TH AVENUE BEZUIDENHOUT VALLEY 221.000  942.000    1.000
+3                   17 ORLANDO STREET KENSINGTON 237.000 2515.000    3.000
+4   66 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY 264.000  977.000    3.000
+5             40 10TH AVENUE BEZUIDENHOUT VALLEY 180.000 1148.000    3.000
+6   64 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY 218.000  976.000    6.000
+7               2 7TH STREET BEZUIDENHOUT VALLEY 269.000 1131.000    4.000
+8             258 7TH AVENUE BEZUIDENHOUT VALLEY  97.000  638.000    2.000
+9             83 10TH AVENUE BEZUIDENHOUT VALLEY 105.000 1104.000    3.000
+10            16 11TH AVENUE BEZUIDENHOUT VALLEY 356.000 1221.000    3.000
+
+    Garage  Bath  Actual Sale Price  Predicted Sale Price
+0    2.000 7.000        1200000.000           1136949.610
+1    0.000 2.500        1500000.000           1375792.990
+2    1.000 3.000        1350000.000           1311757.930
+3    1.000 3.000        1280000.000           1195158.110
+4    0.000 0.000        1420000.000           1438484.610
+5    1.000 2.000        1100000.000           1161445.670
+6    0.000 6.000        1250000.000           1313778.490
+7    1.000 1.000        1300000.000           1263275.450
+8    0.000 1.000        1250000.000           1228893.520
+9    1.000 3.000         950000.000           1051638.010
+10   1.000 3.000        1325000.000           1447825.610
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{plotting-graph-of-actual-and-predicted-sales-price-for-homes-in-bez-valley}{%
+\paragraph{Plotting Graph of Actual and Predicted Sales Price for homes
+in Bez
+Valley}\label{plotting-graph-of-actual-and-predicted-sales-price-for-homes-in-bez-valley}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{74}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+\PY{n}{plt}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{df\PYZus{}predicted}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{df\PYZus{}predicted}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{df\PYZus{}predicted}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{df\PYZus{}predicted}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Home Meterage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price in R(Million)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{                             Actual and Predicted Sales Price for homes in Bez Valley}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} add a legend}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{ML_model_to_evaluate_price_of_property_files/ML_model_to_evaluate_price_of_property_21_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \hypertarget{for-fun-how-much-our-somerset-west-home-specs-would-sell-for-in-bez-valley}{%
+\paragraph{For fun how much our Somerset West Home Specs would sell for
+in Bez
+Valley}\label{for-fun-how-much-our-somerset-west-home-specs-would-sell-for-in-bez-valley}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{75}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{}HomeM,Erf,Bedroom,Garage,Bathroom\PYZdq{}}
+\PY{n}{prediction} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{p}{[}\PY{p}{[}\PY{l+m+mi}{1028}\PY{p}{,}\PY{l+m+mi}{414}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{,}\PY{l+m+mi}{3}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{]}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\PY{n}{prediction} \PY{o}{=} \PY{n+nb}{round}\PY{p}{(}\PY{n}{prediction}\PY{p}{,}\PY{l+m+mi}{2}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{R}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{prediction}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+R 2202585.72
+    \end{Verbatim}
+
+    \hypertarget{using-tensorflow-to-build-a-deep-learning-neural-network-model}{%
+\subsubsection{Using tensorflow to build a deep learning neural network
+model}\label{using-tensorflow-to-build-a-deep-learning-neural-network-model}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{76}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{from} \PY{n+nn}{unicodedata} \PY{k+kn}{import} \PY{n}{name}
+\PY{k+kn}{import} \PY{n+nn}{tensorflow} \PY{k}{as} \PY{n+nn}{tf}
+\PY{k+kn}{import} \PY{n+nn}{pydot}
+\PY{k+kn}{import} \PY{n+nn}{graphviz}
+\PY{k+kn}{import} \PY{n+nn}{seaborn} \PY{k}{as} \PY{n+nn}{sns}
+\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+
+\PY{n}{train\PYZus{}dataset} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{sample}\PY{p}{(}\PY{n}{frac}\PY{o}{=}\PY{l+m+mf}{0.8}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+\PY{n}{test\PYZus{}dataset} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{n}{train\PYZus{}dataset}\PY{o}{.}\PY{n}{index}\PY{p}{)}
+
+\PY{n}{X\PYZus{}train} \PY{o}{=} \PY{n}{train\PYZus{}dataset}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}\PY{o}{.}\PY{n}{values}
+\PY{n}{y\PYZus{}train} \PY{o}{=} \PY{n}{train\PYZus{}dataset}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}\PY{o}{.}\PY{n}{values}
+
+\PY{c+c1}{\PYZsh{} build deep learning model}
+\PY{n}{model} \PY{o}{=} \PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{models}\PY{o}{.}\PY{n}{Sequential}\PY{p}{(}\PY{p}{[}
+    \PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{layers}\PY{o}{.}\PY{n}{Dense}\PY{p}{(}\PY{l+m+mi}{64}\PY{p}{,} \PY{n}{activation}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{relu}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Input\PYZus{}Layer}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{input\PYZus{}shape}\PY{o}{=}\PY{p}{[}\PY{n+nb}{len}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}\PY{p}{]}\PY{p}{)}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{layers}\PY{o}{.}\PY{n}{Dense}\PY{p}{(}\PY{l+m+mi}{64}\PY{p}{,} \PY{n}{activation}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{relu}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Hidden\PYZus{}Layer\PYZus{}1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{layers}\PY{o}{.}\PY{n}{Dense}\PY{p}{(}\PY{l+m+mi}{64}\PY{p}{,} \PY{n}{activation}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{relu}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Hidden\PYZus{}Layer\PYZus{}2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{,}
+    \PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{layers}\PY{o}{.}\PY{n}{Dense}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,}\PY{n}{name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Output\PYZus{}layer}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{p}{]}\PY{p}{)}
+
+\PY{n}{model}\PY{o}{.}\PY{n}{compile}\PY{p}{(}\PY{n}{loss}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mean\PYZus{}squared\PYZus{}error}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+                \PY{n}{optimizer}\PY{o}{=}\PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{optimizers}\PY{o}{.}\PY{n}{Adam}\PY{p}{(}\PY{l+m+mf}{0.01}\PY{p}{)}\PY{p}{,}
+                \PY{n}{metrics}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mean\PYZus{}absolute\PYZus{}error}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mean\PYZus{}squared\PYZus{}error}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+
+\PY{n}{model}\PY{o}{.}\PY{n}{summary}\PY{p}{(}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} train model}
+\PY{n}{history} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,} \PY{n}{epochs}\PY{o}{=}\PY{l+m+mi}{1000}\PY{p}{,} \PY{n}{verbose}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} plot loss}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{history}\PY{o}{.}\PY{n}{history}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{loss}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Model Loss}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Loss}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Epoch}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Train}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{loc}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{upper left}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+
+
+\PY{c+c1}{\PYZsh{}inspecting data }
+\PY{n}{sns}\PY{o}{.}\PY{n}{pairplot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}\PY{p}{,} \PY{n}{diag\PYZus{}kind}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{kde}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{savefig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{pairplot.png}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} plot mean absolute error}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{history}\PY{o}{.}\PY{n}{history}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{mean\PYZus{}absolute\PYZus{}error}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Model Mean Absolute Error}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mean Absolute Error}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} predict house sales price}
+\PY{n}{X\PYZus{}test} \PY{o}{=} \PY{n}{test\PYZus{}dataset}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}\PY{o}{.}\PY{n}{values}
+\PY{n}{y\PYZus{}test} \PY{o}{=} \PY{n}{test\PYZus{}dataset}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}\PY{o}{.}\PY{n}{values}
+\PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{X\PYZus{}test}\PY{p}{)}\PY{o}{.}\PY{n}{flatten}\PY{p}{(}\PY{p}{)}
+
+\PY{n}{pd}\PY{o}{.}\PY{n}{set\PYZus{}option}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{display.float\PYZus{}format}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{k}{lambda} \PY{n}{x}\PY{p}{:} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+si}{\PYZpc{}.3f}\PY{l+s+s1}{\PYZsq{}} \PY{o}{\PYZpc{}} \PY{n}{x}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} for all the data in a pandas dataframe predict house sales price}
+\PY{n}{X} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bath}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}\PY{o}{.}\PY{n}{values}
+\PY{n}{y} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}\PY{o}{.}\PY{n}{values}
+\PY{n}{y\PYZus{}pred} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{X}\PY{p}{)}\PY{o}{.}\PY{n}{flatten}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Model: "sequential\_4"
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+ Layer (type)                Output Shape              Param \#
+=================================================================
+ Input\_Layer (Dense)         (None, 64)                384
+
+ Hidden\_Layer\_1 (Dense)      (None, 64)                4160
+
+ Hidden\_Layer\_2 (Dense)      (None, 64)                4160
+
+ Output\_layer (Dense)        (None, 1)                 65
+
+=================================================================
+Total params: 8,769
+Trainable params: 8,769
+Non-trainable params: 0
+\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{ML_model_to_evaluate_price_of_property_files/ML_model_to_evaluate_price_of_property_25_1.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+1/1 [==============================] - 0s 35ms/step
+1/1 [==============================] - 0s 14ms/step
+    \end{Verbatim}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{ML_model_to_evaluate_price_of_property_files/ML_model_to_evaluate_price_of_property_25_3.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \hypertarget{making-a-new-prediction-of-a-house-in-bez-valley-using-a-neural-network}{%
+\paragraph{Making a new prediction of a house in Bez Valley using a
+Neural
+Network}\label{making-a-new-prediction-of-a-house-in-bez-valley-using-a-neural-network}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{77}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{}\PYZdq{}HomeM,Erf,Bedroom,Garage,Bathroom}
+\PY{n}{X\PYZus{}new} \PY{o}{=} \PY{p}{[}\PY{p}{[}\PY{l+m+mi}{248}\PY{p}{,}\PY{l+m+mi}{495}\PY{p}{,}\PY{l+m+mi}{5}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{,}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{]}
+\PY{n}{y\PYZus{}new} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{X\PYZus{}new}\PY{p}{)}\PY{o}{.}\PY{n}{flatten}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{float}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} put actual vs predicted house sales price in a table}
+\PY{n}{df\PYZus{}predicted} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{p}{\PYZob{}}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{HomeM}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{X\PYZus{}new}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Erf}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{X\PYZus{}new}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bedroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{X\PYZus{}new}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Garage}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{X\PYZus{}new}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Bathroom}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{X\PYZus{}new}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:}\PY{n}{y\PYZus{}new}\PY{p}{\PYZcb{}}\PY{p}{)}
+\PY{n}{df\PYZus{}predicted}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+1/1 [==============================] - 0s 55ms/step
+    \end{Verbatim}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{77}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+   HomeM  Erf  Bedroom  Garage  Bathroom  Predicted Sale Price
+0    248  495        5       1         4           1410527.375
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \hypertarget{our-dataframe-using-neural-networks-to-predict-sales-price}{%
+\subparagraph{Our Dataframe using Neural Networks to predict sales
+price}\label{our-dataframe-using-neural-networks-to-predict-sales-price}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{78}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{y\PYZus{}pred}
+\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{y}
+\PY{n}{df}
+\end{Verbatim}
+\end{tcolorbox}
+
+            \begin{tcolorbox}[breakable, size=fbox, boxrule=.5pt, pad at break*=1mm, opacityfill=0]
+\prompt{Out}{outcolor}{78}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+                                  Street Address             Township  \textbackslash{}
+0             214 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+1             193 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+2             276 8TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+3                   17 ORLANDO STREET KENSINGTON           KENSINGTON
+4   66 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+5             40 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+6   64 ALBERTINA SISULU ROAD BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+7               2 7TH STREET BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+8             258 7TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+9             83 10TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+10            16 11TH AVENUE BEZUIDENHOUT VALLEY  BEZUIDENHOUT VALLEY
+
+   Erf I Portion  Sales Date     Reg Date Sales Price  Size    R/m\^{}2  \textbackslash{}
+0          594 0    20211018 20220128.000 1200000.000   495  R 2 424
+1          573 0    20211214        0.000 1500000.000   495    R3030
+2          942 0    20220520        0.000 1350000.000   495   R 2727
+3         2515 0    20220121 20220328.000 1280000.000   495  R 2 586
+4          977 0    20211021 20211210.000 1420000.000   495  R 2 869
+5         1148 0    20210803 20211112.000 1100000.000   495  R 2 222
+6          976 0    20210714 20211102.000 1250000.000   495   R 2525
+7         1131 0    20210806 20211115.000 1300000.000   495   R 2626
+8            638    20210618 20210906.000 1250000.000   495   R 2525
+9         1104 0    20210919 20220309.000  950000.000   495    R 919
+10        1221 0    20210610 20211007.000 1325000.000   543    R 440
+
+    Distance  Bedroom  Bath Garage   HomeM   R/HomeM      Erf Portion  \textbackslash{}
+0         94    7.000 7.000  2.000 300.000  4000.000  594.000       0
+1        248    3.000 2.500  0.000 200.000  7500.000  573.000       0
+2        478    1.000 3.000  1.000 221.000  6108.597  942.000       0
+3        442    3.000 3.000  1.000 237.000  5400.844 2515.000       0
+4        290    3.000 0.000  0.000 264.000  5378.788  977.000       0
+5        231    3.000 2.000  1.000 180.000  6111.111 1148.000       0
+6        304    6.000 6.000  0.000 218.000  5733.945  976.000       0
+7        322    4.000 1.000  1.000 269.000  4832.714 1131.000       0
+8        328    2.000 1.000  0.000  97.000 12886.598  638.000       0
+9        297    3.000 3.000  1.000 105.000  9047.619 1104.000       0
+10       303    3.000 3.000  1.000 356.000  3721.910 1221.000       0
+
+    Predicted Sales Price  Actual Sales Price
+0             1782373.375         1200000.000
+1             1137158.250         1500000.000
+2             1074770.250         1350000.000
+3             1406023.250         1280000.000
+4             1285983.125         1420000.000
+5             1029428.188         1100000.000
+6             1577281.875         1250000.000
+7             1350767.375         1300000.000
+8              660075.375         1250000.000
+9              810844.938          950000.000
+10            1689470.750         1325000.000
+\end{Verbatim}
+\end{tcolorbox}
+        
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{79}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{} drawing line plot of actual vs predicted house sales price and saving fig}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sales Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,}\PY{n}{color}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{House Index In Dataset}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sales Price in R(Million)}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{           Actual and Predicted Sales Price for homes in Bez Valley}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{c+c1}{\PYZsh{} add a legend}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Predicted Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual Sale Price}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{}export fig}
+\PY{n}{plt}\PY{o}{.}\PY{n}{savefig}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Actual\PYZus{}vs\PYZus{}Predicted\PYZus{}Sales\PYZus{}Price.png}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{ML_model_to_evaluate_price_of_property_files/ML_model_to_evaluate_price_of_property_30_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \hypertarget{displaying-model-as-a-neural-network}{%
+\paragraph{Displaying model as a neural
+network}\label{displaying-model-as-a-neural-network}}
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{80}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{tf}\PY{o}{.}\PY{n}{keras}\PY{o}{.}\PY{n}{utils}\PY{o}{.}\PY{n}{plot\PYZus{}model}\PY{p}{(}\PY{n}{model}\PY{p}{,} \PY{n}{to\PYZus{}file}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{model.png}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{show\PYZus{}shapes}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{show\PYZus{}layer\PYZus{}names}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+ 
+            
+\prompt{Out}{outcolor}{80}{}
+    
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{ML_model_to_evaluate_price_of_property_files/ML_model_to_evaluate_price_of_property_32_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
